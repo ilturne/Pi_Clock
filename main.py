@@ -13,6 +13,17 @@ GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # LCD setup
 display = drivers.Lcd()
 
+def test_button():
+    """Test the button and print a message when it is pressed."""
+    while True:
+        button_state = GPIO.input(BUTTON_PIN)
+        if button_state == GPIO.LOW:
+            print("Button has been pressed!")
+            sleep(0.1)  # Debounce delay
+        sleep(0.1)  # Short delay to reduce CPU usage
+
+test_button()
+
 def get_current_time():
     """Retrieve and format the current time."""
     return datetime.now().strftime("%H:%M:%S")
