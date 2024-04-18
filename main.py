@@ -1,35 +1,57 @@
 #!/usr/bin/env python3
 
-# Import necessary libraries for communication and display use
 import drivers
 from time import sleep
 from datetime import datetime
+import RPi.GPIO as GPIO
+
+# GPIO setup
+BUTTON_PIN = 11  # Change this based on your wiring
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# LCD setup
+display = drivers.Lcd()
 
 def get_current_time():
-    """Retrieve current time and format it to display hours and minutes."""
-    current_time = datetime.now()
-    return current_time.strftime("%H:%M")
+    """Retrieve and format the current time."""
+    return datetime.now().strftime("%H:%M:%S")
+
+def cycle_mode(current_mode):
+    """Cycle through the mode options."""
+    modes = ["Clock", "Timer", "Stopwatch", "Alarm"]
+    new_index = (modes.index(current_mode) + 1) % len(modes)
+    return modes[new_index]
 
 def main():
-    # Initialize the LCD display
-    display = drivers.Lcd()
-    print("Writing to display")
+    current_mode = "Clock"  # Start with Clock mode
+    last_button_state = GPIO.HIGH
 
     try:
         while True:
-            # Fetch and format the current time
-            time_formatted = get_current_time()
+            # Display the current time on the first line
+            current_time = get_current_time()
+            display.lcd_display_string(current_time, 1)
 
-            # Write just the time to the display
-            display.lcd_display_string(time_formatted, 1)
+            # Check for button press (change of state)
+            button_state = GPIO.input(BUTTON_PIN)
+            if button_state == GPIO.LOW and last_button_state == GPIO.HIGH:
+                # Button has been pressed
+                current_mode = cycle_mode(current_mode)
+                sleep(0.1)  # Debounce delay
 
-            # Refresh every second
-            sleep(1)
+            # Update the last button state
+            last_button_state = button_state
+
+            # Display the current mode on the second line
+            display.lcd_display_string(f"Mode: {current_mode}", 2)
+
+            sleep(0.1)  # Short delay to reduce CPU usage
 
     except KeyboardInterrupt:
-        # If there is a KeyboardInterrupt (when you press ctrl+c), exit the program and cleanup
-        print("Cleaning up!")
+        # Cleanup the display and GPIO on Ctrl-C exit
         display.lcd_clear()
+        GPIO.cleanup()
 
 if __name__ == '__main__':
     main()
