@@ -6,23 +6,12 @@ from datetime import datetime
 import RPi.GPIO as GPIO
 
 # GPIO setup
-BUTTON_PIN = 11  # Change this based on your wiring
+BUTTON_PIN = 17  # Change this based on your wiring
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # LCD setup
 display = drivers.Lcd()
-
-def test_button():
-    """Test the button and print a message when it is pressed."""
-    while True:
-        button_state = GPIO.input(BUTTON_PIN)
-        if button_state == GPIO.LOW:
-            print("Button has been pressed!")
-            sleep(0.1)  # Debounce delay
-        sleep(0.1)  # Short delay to reduce CPU usage
-
-test_button()
 
 def get_current_time():
     """Retrieve and format the current time."""
@@ -55,7 +44,8 @@ def main():
             last_button_state = button_state
 
             # Display the current mode on the second line
-            display.lcd_display_string(f"Mode: {current_mode}", 2)
+            mode_display_text = "Mode: {}".format(current_mode)
+            display.lcd_display_string(mode_display_text, 2)
 
             sleep(0.1)  # Short delay to reduce CPU usage
 
