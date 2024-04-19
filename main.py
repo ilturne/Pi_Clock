@@ -53,7 +53,14 @@ def main():
             option_button_state = GPIO.input(OPTION_BUTTON_PIN)
             if option_button_state == GPIO.LOW and last_option_button_state == GPIO.HIGH:
                 # Here you'll cycle between H, M, and S and update alarm_setting_option
+                if alarm_setting_option == "H":
+                    alarm_setting_option = "M"
+                elif alarm_setting_option == "M":
+                    alarm_setting_option = "S"
+                else:
+                    alarm_setting_option = "H"
                 sleep(0.1)  # Debounce delay
+                # Implementation of setting the alarm option will be added later
 
             # Update the last button states
             last_button_state = button_state
