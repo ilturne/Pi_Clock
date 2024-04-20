@@ -10,6 +10,7 @@ BUTTON_PIN = 17  # Mode switch button
 OPTION_BUTTON_PIN = 27  # Alarm time setting option button
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(OPTION_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # LCD setup
 display = drivers.Lcd()
