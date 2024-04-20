@@ -26,12 +26,12 @@ def cycle_mode(current_mode):
     return modes[new_index]
 
 def format_timedelta(td):
-    """Format timedelta to HH:MM:SS."""
+    """Format timedelta to MM:SS:MS."""
     # Calculate total seconds in the timedelta
     total_seconds = int(td.total_seconds())
-    hours, remainder = divmod(total_seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
+    minutes, seconds = divmod(total_seconds, 60)
+    milliseconds = td.microseconds // 1000
+    return "{:02}:{:02}:{:03}".format(minutes, seconds, milliseconds)
 
 def main():
     current_mode = "Clock"  # Start with Clock mode
