@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import drivers
-import time
+from time import sleep, strftime
 from datetime import datetime, timedelta
 import RPi.GPIO as GPIO
 
@@ -31,7 +31,7 @@ def format_timedelta(td):
     total_seconds = int(td.total_seconds())
     hours, remainder = divmod(total_seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
-    return f"{hours:02}:{minutes:02}:{seconds:02}"
+    return "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
 
 def main():
     current_mode = "Clock"  # Start with Clock mode
@@ -97,7 +97,7 @@ def main():
             last_button_state = button_state
             last_option_button_state = option_button_state
 
-            mode_display_text = f"Mode: {current_mode}"
+            mode_display_text = "Mode: {}".format(current_mode)
             display.lcd_display_string(mode_display_text, 2)
 
             sleep(0.1)  # Short delay to reduce CPU usage
