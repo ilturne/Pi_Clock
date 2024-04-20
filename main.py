@@ -27,8 +27,10 @@ def cycle_mode(current_mode):
 
 def format_timedelta(td):
     """Format timedelta to HH:MM:SS."""
-    minutes, seconds = divmod(td.seconds, 60)
-    hours, minutes = divmod(minutes, 60)
+    # Calculate total seconds in the timedelta
+    total_seconds = int(td.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
     return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 def main():
@@ -37,7 +39,7 @@ def main():
     stopwatch_running = False
     stopwatch_start = None
     stopwatch_elapsed = timedelta(0)
-    timer_set = timedelta(minutes=5)  # Example default timer setting
+    timer_set = timedelta(minutes=5)  # Default timer setting
     timer_active = False
     timer_start_time = None
 
@@ -60,13 +62,13 @@ def main():
                     remaining_time = timer_set - elapsed
                     if remaining_time.total_seconds() <= 0:
                         timer_active = False
-                        display.lcd_display_string("Time's Up!", 1)
+                        display.lcd_display_string("00:00:00", 1)  # Timer expired
                     else:
                         display.lcd_display_string(format_timedelta(remaining_time), 1)
                 else:
-                    display.lcd_display_string(format_timedelta(timer_set), 1)
+                    display.lcd_display_string(format_timedelta(timer_set), 1)  # Display preset time
 
-            # Mode switch button
+            # Handling button states and mode switching
             button_state = GPIO.input(BUTTON_PIN)
             if button_state == GPIO.LOW and last_button_state == GPIO.HIGH:
                 current_mode = cycle_mode(current_mode)
@@ -75,7 +77,6 @@ def main():
                 timer_active = False  # Reset timer on mode switch
                 sleep(0.1)  # Debounce delay
 
-            # Option button logic for Timer and Stopwatch
             option_button_state = GPIO.input(OPTION_BUTTON_PIN)
             if option_button_state == GPIO.LOW and last_option_button_state == GPIO.HIGH:
                 if current_mode == "Stopwatch":
