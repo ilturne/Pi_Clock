@@ -15,7 +15,7 @@ ENCODER_CH_B = 22
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(OPTION_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(SPEAKER_BUTTON_PIN, GPIO.OUT)
+#GPIO.setup(SPEAKER_BUTTON_PIN, GPIO.OUT)
 GPIO.setup(ENCODER_CH_A, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(ENCODER_CH_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
@@ -48,7 +48,10 @@ def update_timer(encoder_a):
         if timer_set.total_seconds() < 0:
             timer_set = timedelta(seconds=0)  # Prevent negative timer
 
+timer_set = timedelta(minutes=5)
+
 def main():
+    global timer_set
     current_mode = "Clock"
     last_button_state = GPIO.HIGH
     stopwatch_running = False
