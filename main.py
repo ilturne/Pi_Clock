@@ -38,9 +38,10 @@ def timer_alarm():
         pwm.ChangeDutyCycle(0)
         GPIO.cleanup()
 
-# LCD setup
-display = drivers.Lcd()
-
+def clear_lcd():
+	display.lcd_display_string("                ", 1)
+	display.lcd_display_string("                ", 2)
+    
 def get_current_time():
     """Retrieve and format the current time."""
     return datetime.now().strftime("%H:%M:%S")
@@ -70,7 +71,7 @@ def update_timer(encoder_a):
 timer_set = timedelta(minutes=5)
 pwm = GPIO.PWM(SPEAKER_BUTTON_PIN, 1000)  # Initialize PWM on the speaker pin at 1000 Hz
 pwm.start(50)  # Start PWM with 50% duty cycle
-
+display = drivers.Lcd()
 
 def main():
     pwm.stop()
@@ -115,6 +116,7 @@ def main():
             button_state = GPIO.input(BUTTON_PIN)
             if button_state == GPIO.LOW and last_button_state == GPIO.HIGH:
                 current_mode = cycle_mode(current_mode)
+                clear_lcd()
                 stopwatch_running = False
                 stopwatch_elapsed = timedelta(0)
                 timer_active = False  # Reset timer on mode switch
