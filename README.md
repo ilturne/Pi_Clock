@@ -1,4 +1,4 @@
-# Pi_Clock Project README
+# Pi_Clock Project
 
 ## Introduction
 The Pi_Clock project combines a real-time clock and multi-functional timer into a single device, built using a Raspberry Pi 3. It features a user-friendly interface with an LCD for display, buttons for mode selection, and a rotary encoder for setting times. This device can function as a clock, alarm, or timer, providing both visual and audible notifications.
