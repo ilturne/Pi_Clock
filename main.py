@@ -9,10 +9,15 @@ import RPi.GPIO as GPIO
 BUTTON_PIN = 17  # Mode switch button
 OPTION_BUTTON_PIN = 27  # Start/Stop/Reset button for Stopwatch and Timer
 SPEAKER_BUTTON_PIN = 13 # PIN With PWM availability
+ENCODER_CH_A = 23
+ENCODER_CH_B = 22
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(OPTION_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(SPEAKER_BUTTON_PIN, GPIO.OUT)
+GPIO.setup(ENCODER_CH_A, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(ENCODER_CH_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # LCD setup
 display = drivers.Lcd()
@@ -47,6 +52,16 @@ def format_timedelta(td):
     milliseconds = td.microseconds // 1000
     return "{:02}:{:02}:{:03}".format(minutes, seconds, milliseconds)
 
+def update_timer(encoder_a):
+    if GPIO.input(ENCODER_CH_B) != GPIO.input(ENCODER_CH_A):
+        global timer_set
+        timer_set += timedelta(seconds=5)  # Increase by 5 seconds
+    else:
+        timer_set -= timedelta(seconds=5)  # Decrease by 5 seconds
+        if timer_set.total_seconds() < 0:
+            timer_set = timedelta(seconds=0)  # Prevent negative timer
+
+
 def main():
     current_mode = "Clock"  # Start with Clock mode
     last_button_state = GPIO.HIGH
@@ -74,14 +89,15 @@ def main():
                 if timer_active:
                     elapsed = datetime.now() - timer_start_time
                     remaining_time = timer_set - elapsed
-                    if remaining_time.total_seconds() <= 0:
-                        timer_active = False
-                        display.lcd_display_string("00:00:00", 1)  # Timer expired
-                        play_alarm() #Goes to the alarm function 
-                    else:
-                        display.lcd_display_string(format_timedelta(remaining_time), 1)
+                if remaining_time.total_seconds() <= 0:
+                    timer_active = False
+                    display.lcd_display_string("00:00:00", 1)  # Timer expired
+                    # play_alarm() function here
                 else:
-                    display.lcd_display_string(format_timedelta(timer_set), 1)  # Display preset time
+                    display.lcd_display_string(format_timedelta(remaining_time), 1)
+            else:
+                    display.lcd_display_string(format_timedelta(timer_set), 1)  # Show updated set time
+
 
             # Handling button states and mode switching
             button_state = GPIO.input(BUTTON_PIN)
@@ -106,6 +122,10 @@ def main():
                         timer_start_time = datetime.now()
                         timer_active = True
                     else:
+                        if (datetime.now() - timer_start_time).total_seconds() < 1:
+                            # Reset if pressed quickly after pausing
+                            timer_set = timedelta(minutes=5)  # Reset to default or a stored value
+                            display.lcd_display_string(format_timedelta(timer_set), 1)
                         timer_active = False
                 sleep(0.1)  # Debounce delay
 
@@ -120,6 +140,8 @@ def main():
     except KeyboardInterrupt:
         display.lcd_clear()
         GPIO.cleanup()
+
+GPIO.add_event_detect(ENCODER_CH_A, GPIO.BOTH, callback=update_timer, bouncetime=6)
 
 if __name__ == '__main__':
     main()
