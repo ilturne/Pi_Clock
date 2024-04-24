@@ -11,13 +11,31 @@ OPTION_BUTTON_PIN = 27  # Start/Stop/Reset button for Stopwatch and Timer
 SPEAKER_BUTTON_PIN = 13 # PIN With PWM availability
 ENCODER_CH_A = 23
 ENCODER_CH_B = 22
+R_LED_PIN = 26  # Define the GPIO pin number for the Red LED
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(OPTION_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-#GPIO.setup(SPEAKER_BUTTON_PIN, GPIO.OUT)
+GPIO.setup(SPEAKER_BUTTON_PIN, GPIO.OUT)
 GPIO.setup(ENCODER_CH_A, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(ENCODER_CH_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(R_LED_PIN, GPIO.OUT)  # Setup the Red LED pin as an output
+
+def timer_alarm():
+    pwm.start(50)  # Start PWM for the speaker if it's a PWM speaker
+    GPIO.output(R_LED_PIN, GPIO.HIGH)  # Turn on the LED
+    try:
+        for frequency in [392, 523, 784, 1046]:  # Different frequencies for the alarm
+            pwm.ChangeFrequency(frequency)
+            GPIO.output(R_LED_PIN, GPIO.HIGH)  # Ensure LED is on during sound
+            sleep(0.2)  # Time period between frequency changes
+            GPIO.output(R_LED_PIN, GPIO.LOW)  # Turn off LED briefly
+            sleep(0.2)
+        pwm.stop()  # Stop the PWM signal to the speaker
+    except KeyboardInterrupt:
+        pwm.stop()
+        GPIO.cleanup()
 
 # LCD setup
 display = drivers.Lcd()
@@ -49,6 +67,9 @@ def update_timer(encoder_a):
             timer_set = timedelta(seconds=0)  # Prevent negative timer
 
 timer_set = timedelta(minutes=5)
+pwm = GPIO.PWM(SPEAKER_BUTTON_PIN, 1000)  # Initialize PWM on the speaker pin at 1000 Hz
+pwm.start(50)  # Start PWM with 50% duty cycle
+
 
 def main():
     global timer_set
@@ -82,6 +103,7 @@ def main():
                     if remaining_time.total_seconds() <= 0:
                         timer_active = False
                         display.lcd_display_string("00:00:00", 1)  # Timer expired
+                        timer_alarm() 
                     else:
                         display.lcd_display_string(format_timedelta(remaining_time), 1)
                 else:
