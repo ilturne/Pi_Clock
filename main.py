@@ -26,15 +26,16 @@ def timer_alarm():
     pwm.start(50)  # Start PWM for the speaker if it's a PWM speaker
     GPIO.output(R_LED_PIN, GPIO.HIGH)  # Turn on the LED
     try:
-        for frequency in [392, 523, 784, 1046]:  # Different frequencies for the alarm
-            pwm.ChangeFrequency(frequency)
-            GPIO.output(R_LED_PIN, GPIO.HIGH)  # Ensure LED is on during sound
-            sleep(0.2)  # Time period between frequency changes
-            GPIO.output(R_LED_PIN, GPIO.LOW)  # Turn off LED briefly
-            sleep(0.2)
-        pwm.stop()  # Stop the PWM signal to the speaker
+		for _ in range(5):
+			for frequency in [392, 523, 784, 1046]:  # Different frequencies for the alarm
+				pwm.ChangeFrequency(frequency)
+				GPIO.output(R_LED_PIN, GPIO.HIGH)  # Ensure LED is on during sound
+				sleep(0.2)  # Time period between frequency changes
+				GPIO.output(R_LED_PIN, GPIO.LOW)  # Turn off LED briefly
+				sleep(0.2)
     except KeyboardInterrupt:
         pwm.stop()
+        pwm.ChangeDutyCycle(0)
         GPIO.cleanup()
 
 # LCD setup
@@ -72,6 +73,7 @@ pwm.start(50)  # Start PWM with 50% duty cycle
 
 
 def main():
+    pwm.stop()
     global timer_set
     current_mode = "Clock"
     last_button_state = GPIO.HIGH
@@ -104,6 +106,7 @@ def main():
                         timer_active = False
                         display.lcd_display_string("00:00:00", 1)  # Timer expired
                         timer_alarm() 
+                        pwm.stop()
                     else:
                         display.lcd_display_string(format_timedelta(remaining_time), 1)
                 else:
@@ -147,7 +150,10 @@ def main():
 
     except KeyboardInterrupt:
         display.lcd_clear()
+        pwm.ChangeDutyCycle(0)
+        pwm.stop()
         GPIO.cleanup()
+        
 
 GPIO.add_event_detect(ENCODER_CH_A, GPIO.BOTH, callback=update_timer, bouncetime=6)
 
