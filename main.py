@@ -8,15 +8,12 @@ import RPi.GPIO as GPIO
 # GPIO setup
 BUTTON_PIN = 17  # Mode switch button
 OPTION_BUTTON_PIN = 27  # Start/Stop/Reset button for Stopwatch and Timer
-<<<<<<< HEAD
-=======
 SPEAKER_BUTTON_PIN = 13 # PIN With PWM availability
 ENCODER_CH_A = 23
 ENCODER_CH_B = 22
 R_LED_PIN = 26  # Define the GPIO pin number for the Red LED
 
 
->>>>>>> alarm
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(OPTION_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -56,17 +53,11 @@ def cycle_mode(current_mode):
 
 def format_timedelta(td):
     """Format timedelta to MM:SS:MS."""
-<<<<<<< HEAD
-    # Calculate total seconds in the timedelta
-=======
->>>>>>> alarm
     total_seconds = int(td.total_seconds())
     minutes, seconds = divmod(total_seconds, 60)
     milliseconds = td.microseconds // 1000
     return "{:02}:{:02}:{:03}".format(minutes, seconds, milliseconds)
 
-<<<<<<< HEAD
-=======
 def update_timer(encoder_a):
     global timer_set
     if GPIO.input(ENCODER_CH_B) != GPIO.input(ENCODER_CH_A):
@@ -81,7 +72,6 @@ pwm = GPIO.PWM(SPEAKER_BUTTON_PIN, 1000)  # Initialize PWM on the speaker pin at
 pwm.start(50)  # Start PWM with 50% duty cycle
 
 
->>>>>>> alarm
 def main():
     pwm.stop()
     global timer_set
@@ -93,10 +83,7 @@ def main():
     timer_set = timedelta(minutes=5)  # Default timer setting
     timer_active = False
     timer_start_time = None
-<<<<<<< HEAD
-=======
     remaining_time = timedelta()  # Initialize remaining_time
->>>>>>> alarm
 
     try:
         while True:
@@ -118,20 +105,13 @@ def main():
                     if remaining_time.total_seconds() <= 0:
                         timer_active = False
                         display.lcd_display_string("00:00:00", 1)  # Timer expired
-<<<<<<< HEAD
-=======
                         timer_alarm() 
                         pwm.stop()
->>>>>>> alarm
                     else:
                         display.lcd_display_string(format_timedelta(remaining_time), 1)
                 else:
                     display.lcd_display_string(format_timedelta(timer_set), 1)  # Display preset time
 
-<<<<<<< HEAD
-            # Handling button states and mode switching
-=======
->>>>>>> alarm
             button_state = GPIO.input(BUTTON_PIN)
             if button_state == GPIO.LOW and last_button_state == GPIO.HIGH:
                 current_mode = cycle_mode(current_mode)
@@ -155,12 +135,9 @@ def main():
                         timer_active = True
                     else:
                         timer_active = False
-<<<<<<< HEAD
-=======
                         if (datetime.now() - timer_start_time).total_seconds() < 1:
                             timer_set = timedelta(minutes=5)  # Reset to default or a stored value
                             display.lcd_display_string(format_timedelta(timer_set), 1)
->>>>>>> alarm
                 sleep(0.1)  # Debounce delay
 
             last_button_state = button_state
